@@ -43,7 +43,8 @@ def getIPAddr(ifname):
 def getDieTemp():
     try:
         with open('/sys/class/thermal/thermal_zone0/temp') as f:
-            return repr(f.read())
+            readableTemp = float(f.read())/1000.
+            return repr(readableTemp) + '*C'
     except:
         dbg.write('Unexpected Error: ' + sys.exc_info()[0] + '\n')
         return 'Failed'
