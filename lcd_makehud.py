@@ -39,6 +39,15 @@ def getIPAddr(ifname):
         dbg.write('Unexpected Error: ' + sys.exc_info()[0] + '\n')
         return 'Failed'
 
+# get RPi Die Temperature
+def getDieTemp():
+    try:
+        with open('/sys/class/thermal/thermal_zone0/temp') as f:
+            return repr(f.read())
+    except:
+        dbg.write('Unexpected Error: ' + sys.exc_info()[0] + '\n')
+        return 'Failed'
+
 def plateIPMAC(ifname):
     try:
         dbg.write('Clearing LCD Plate!\n')
@@ -69,6 +78,7 @@ dbg.write('*** DEBUG FILE START ***\n')
 
 # test display, wait 3 seconds for DHCP to catch up
 lcd.clear()
+dbg.write('Temp Test' + getDieTemp() + '\n')
 dbg.write('Boot test\nStartup Complete!\n')
 lcd.message('Boot test\nStartup complete!')
 time.sleep(3)
