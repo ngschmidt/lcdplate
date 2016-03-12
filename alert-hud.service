@@ -1,0 +1,12 @@
+[Unit]
+Description=Alert LCD HUD
+After=network.target systemd-networkd-wait-online.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+User=%i
+ExecStart=/usr/lib/python/lcdplate/lcd_makehud.py
+
+[Install]
+WantedBy=multi-user.target
