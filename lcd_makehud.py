@@ -44,7 +44,7 @@ def getDieTemp():
     try:
         with open('/sys/class/thermal/thermal_zone0/temp') as f:
             readableTemp = float(f.read())/1000.
-            return repr(readableTemp) + '*C'
+            return repr(readableTemp) + 'C'
     except:
         dbg.write('Unexpected Error: ' + sys.exc_info()[0] + '\n')
         return 'Failed'
@@ -53,7 +53,7 @@ def getDieTemp():
 def getCoreMaxFreq():
     try:
         with open('/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq') as f:
-            readableCoreMaxFreq = float(f.read())/1000.
+            readableCoreMaxFreq = float(f.read())/1000000.
             return repr(readableCoreMaxFreq) + 'gHz'
     except:
         dbg.write('Unexpected Error: ' + sys.exc_info()[0] + '\n')
@@ -63,21 +63,17 @@ def getCoreMaxFreq():
 def getSystemHostName():
     try:
         with open('/etc/hostname') as f:
-            return repr(f)
+            return str(f.read())
     except:
         dbg.write('Unexpected Error: ' + sys.exc_info()[0] + '\n')
         return 'Failed'
 
 
 # combine IP and MAC
-def plateIPMAC(ifname):
+def getIPMAC(ifname):
     try:
-        dbg.write('Clearing LCD Plate!\n')
-        lcd.clear()
-        # write IP/MAC to display
         dbg.write('Writing \n' + getIPAddr('eth0') + '\n' + getMACAddr('eth0') + '\n To screen! \n')
-        lcd.message(getIPAddr('eth0') + '\n' + getMACAddr('eth0'))
-        return 0
+        return getIPAddr('eth0') + '\n' + getMACAddr('eth0')
     except OSError as oserror:
         dbg.write('OS Error Found: {0}'.format(err) + '\n')
         return 1
@@ -85,6 +81,9 @@ def plateIPMAC(ifname):
         dbg.write('Unexpected Error: ' + sys.exc_info()[0] + '\n')
         return 2
 
+#combine hostname, CPU Governor, and Temp
+def getHUDPrintout():
+    return getSystemHostName() + getCoreMaxFreq() + '   ' + getDieTemp()
 
 # Initialize the LCD using the pins
 lcd = LCD.Adafruit_CharLCDPlate()
@@ -92,7 +91,7 @@ lcd.clear()
 
 # Setup Debug output
 
-dbg = open("/var/log/lcd_log-" + str(time.strftime('%y%m%d-%H%M%S')), 'w')
+dbg = open("/var/log/lcd_log-" + str(time.strftime('%y%m%d')), 'w')
 print(dbg)
 dbg.write('*** DEBUG FILE START ***\n')
 
@@ -100,11 +99,12 @@ dbg.write('*** DEBUG FILE START ***\n')
 
 # test display, wait 3 seconds for DHCP to catch up
 lcd.clear()
-dbg.write('Temp Test' + getDieTemp() + '\n')
 dbg.write('Boot test\nStartup Complete!\n')
 lcd.message('Boot test\nStartup complete!')
 time.sleep(3)
-plateIPMAC('eth0')
+lcd.clear()
+dbg.write(getHUDPrintout() + '\n')
+lcd.message(getHUDPrintout())
 
 # Handle some events, maybe even a menu
 
@@ -114,10 +114,8 @@ try:
         # Menu tree root
         if lcd.is_pressed(LCD.SELECT):
             lcd.clear()
-            dbg.write('SELECT Pressed!')
-            lcd.message('SELECT Pressed!')
-            time.sleep(2)
-            plateIPMAC('eth0')
+            dbg.write(getIPMAC('eth0') + '\n')
+            lcd.message(getIPMAC('eth0'))
         elif lcd.is_pressed(LCD.LEFT):
             lcd.clear()
             dbg.write('LEFT Pressed!')
@@ -134,6 +132,7 @@ try:
             lcd.clear()
             dbg.write('DOWN Pressed!')
             lcd.message('DOWN Pressed!')
+
 except:
     dbg.write('Unexpected Error: ' + sys.exc_info()[0] + '\n')
     exit()
