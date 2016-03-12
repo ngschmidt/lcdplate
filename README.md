@@ -1,0 +1,2 @@
+# lcdplate
+Adafruit CharLCD Project
