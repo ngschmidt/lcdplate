@@ -49,6 +49,18 @@ def getDieTemp():
         dbg.write('Unexpected Error: ' + sys.exc_info()[0] + '\n')
         return 'Failed'
 
+# get RPi Core Max Freq
+def getCoreMaxFreq():
+    try:
+        with open('/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq') as f:
+            readableCoreMaxFreq = float(f.read())/1000.
+            return repr(readableCoreMaxFreq) + 'gHz'
+    except:
+        dbg.write('Unexpected Error: ' + sys.exc_info()[0] + '\n')
+        return 'Failed'
+
+
+# combine IP and MAC
 def plateIPMAC(ifname):
     try:
         dbg.write('Clearing LCD Plate!\n')
