@@ -59,6 +59,15 @@ def getCoreMaxFreq():
         dbg.write('Unexpected Error: ' + sys.exc_info()[0] + '\n')
         return 'Failed'
 
+# get Rpi Hostname
+def getSystemHostName():
+    try:
+        with open('/etc/hostname') as f:
+            return repr(f)
+    except:
+        dbg.write('Unexpected Error: ' + sys.exc_info()[0] + '\n')
+        return 'Failed'
+
 
 # combine IP and MAC
 def plateIPMAC(ifname):
